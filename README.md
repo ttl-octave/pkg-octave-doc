@@ -1,30 +1,41 @@
 <img alt="octave-doc logo" width="100"
-     src="https://raw.githubusercontent.com/gnu-octave/pkg-octave-doc/main/doc/icon.png">
+     src="https://raw.githubusercontent.com/gnu-octave/pkg-octave-doc/main/doc/pkg-octave-doc.png">
 
 # pkg-octave-doc
 
-Create a **function reference** from Octave help texts (docstrings)
-from single functions or all functions in a package, which can be installed
+Create online documentation from Octave help texts (docstrings)
+of functions and classes in a package, which can be installed
 with **pkg**. The generated pages follow the template of the Octave Packages at
 GitHub Pages based on bootstrap 5 and they have similar layout to the older
-documentation reference pages at Source Forge.
+documentation reference pages at Source Forge. The documentation also includes
+the demos that are available. Legacy classes (in `@class/` folders) are processed
+as individual functions with separate html pages, `classdef` files are processed
+collectively including their public methods in a single html page.
 
 You can find its documentation at [https://gnu-octave.github.io/pkg-octave-doc/](https://gnu-octave.github.io/pkg-octave-doc/).
+
+**Note** that since `pkg-octave-doc (>=0.6.0)` release, Octave (>=9.1) is required.
+Moreover, the categories and function files in the side bar are following the same
+order in the documented package's INDEX file and the classdef HTML page layout
+includes collapsible documentation for all class properties return by calling
+`methods ('classname') as well as collapsible documentation only for the methods
+(including the constructor) that are present in the classdef file (inherited methods
+are ignored).
 
 ## Requirements
 
 * The function `function_texi2html` relies on the
 [texi2html v1.82](https://www.nongnu.org/texi2html/) software which must be
-be installed and available to $PATH.
+installed and available to $PATH.
 
-* If `git` and an internet connection are available, the functions' generated pages
-also include a URL to their respective repository locations.  This feature is only
-available for packages hosted at GitHub.
+* If `curl` and `tar` are installed and available to $PATH, and an internet connection are available,
+the functions' generated pages also include a URL to their respective repository locations.  This
+feature is only available for packages hosted at GitHub.
 
 
 ## Installation
 
-To install the latest version (0.4.7) you need Octave (>=7.2.0) installed on your system. You can install it by typing:
+To install the latest version you need Octave (>=7.2.0) installed on your system. You can install it by typing:
 
 ```
 pkg install -forge pkg-octave-doc
@@ -35,6 +46,7 @@ To install the latest development version type:
 ```
 pkg install "https://github.com/gnu-octave/pkg-octave-doc/archive/refs/heads/main.zip"
 ```
+
 
 ## Usage
 
@@ -56,6 +68,20 @@ You only need to do this once, and the package's website will be automatically u
 ## Guidelines for TEXIFNO docsstrings
 
 
+* `@deftypefn` must be used at the beggining of functions and class methods to describe the function's syntax. Consecutive lines with alternative syntaxes must use `@deftypefnx`. Both tags should stricktly follow the pattern showns in the example below in order to be correctly parsed and generate the appropriate HTML code.
+     ```
+     ## -*- texinfo -*-
+     ## @deftypefn  {} {} function_name ()
+     ## @deftypefnx {package_name} {} function_name ()
+     ## @deftypefnx {package_name} {@var{out} =} function_name ()
+     ## @deftypefnx {package_name} {@var{out} =} function_name (@var{in})
+     ## @deftypefnx {package_name} {[@var{out}, @dots{}] =} function_name (@var{in}, @dots{})
+     ...
+     ## @end deftypefn
+     ```
+     **Note** that even when a function does not accept any input arguments, the parentheses `()` after the function name are mandatory.
+     Also the two sets of curly brackets `{}` before the function name are also mandatory. The first contains the package name (which may be omitted) and the second contains the function's output arguments (including the equal sign operator).
+  
 * `@qcode` is converted to `@code` before texi2html processing, so if you want to display a char string it is best to use @qcode{"somestring"}, which will be displayed properly both on Octave's command window and on HTML output. Keep in mind that `@code{}` encloses the content in single quotes in the command window, although they are not displayed in HTML code.
 
 * fields of structures: it is best practice to write them as `@var{structure_name}.@qcode{field_name}` which appears in the command window as `structure_name.field_name` and in HTML as <var>structure_name</var>.<code>field_name</code>. In bootstrap 5, the `<code>` tag is not highlighted and it looks better than here :smiley:.
@@ -75,7 +101,7 @@ can be converted to
 @item text @tab @tab text
 ````
 
-* Make sure that `@deftypefn` and `@deftypefnx` tags have a space before them.  This is especially important for help strings in oct files (in .cc code) where we don't use ## for initiating a comment line.
+* Make sure that `@deftypefn` and `@deftypefnx` tags have a white space before them.  This is especially important for help strings in oct files (in .cc code) where we don't use ## for initiating a comment line.
 For example:
 
 in .m files
@@ -94,18 +120,77 @@ DEFUN_DLD (libsvmread, args, nargout,
 This function ...
 ````
 
+* Small docstrings containing a single line of help text after the `@deftypefn` tag must have an additional empty line before `@end deftypefn` in order to be parsed correclty. For example, the following docstring
+````
+## -*- texinfo -*-
+## @deftypefn {RTree} {@var{n} =} rect_size ()
+##
+## The size @var{n} in bytes of a rectangle.
+## @end deftypefn
+````
+must be
+````
+## -*- texinfo -*-
+## @deftypefn {RTree} {@var{n} =} rect_size ()
+##
+## The size @var{n} in bytes of a rectangle.
+##
+## @end deftypefn
+````
+in order to be properly formatted in final HTML code.
+
 * `@math{}` texi tags are converted to `<math></math>` tags in HTML and their contents are scanned for `x` and `*` characters, which are replaced by `&times;` in order to properly display the multiplication symbol. Make sure that lower case `x` within the `@math{}` tags is explicitly used for denoting multiplication and it is not used for anything else (e.g. variable name).  This feature, introduced in release 0.4.7, only affects the contents of `@math{}` texi tags. 
 
 * At the moment, `function_texi2html` can handle a signle `@seealso{}` tag. Make sure that there is only one `@seealso{}` tag inside each function's docstring located at the very end just before the `@end deftypefn` texinfo closing statement. Functions listed therein that belong to the same package are also linked to their individual function pages.
 
-* `@tex` tags must only contain latex mathematical expressions enclosed with `$$` identifiers, such as in `$$ ... $$`. Anything else within the `@tex ... @end tex` block but outside the `$$` delimiters is ignored.
+* `@tex` tags must only contain latex mathematical expressions enclosed with `$$` identifiers, such as in `$$ ... $$`. Math delimiters `\(...\)` are also processed in `@tex` blocks.
+
+
+## Guidelines for classdef documentation
+Classdef documentation and demos are handled separately in more specialized manner. For each classdef file, a single HTML page is generated containing collapsible items for the documentation of each public property and methods as well as any demos that may be present in the classdef file. Class properties, methods (including the constructor), and demos are grouped together and they follow the same order as they appear in the classdef file.
+
+Top level classdef documentation and classdef properties should use the `@deftp` tag for name declaration instead of the `@deftypefn` tag used in syntax declaration of functions and class methods. Only a single line should be used for name declaration as shown in the example below.
+
+     ```
+     classdef class_name
+       ## -*- texinfo -*-
+       ## @deftp {package_name} class_name
+       ## 
+       ## A class that does something.
+       ## 
+       ## More info about it...
+       ##
+       ## @end deftp
+       
+       properties
+         ## -*- texinfo -*-
+         ## @deftp {class_name} {property} property_name
+         ##
+         ## Property short description
+         ##
+         ## More info about it...
+         ##
+         ## @end deftp
+         property_name = []
+       endproperties
+       
+     endclassdef
+     ```
+
+The first sentence in the docstring of a property or a method is used as a short description in the collapsible item. The respective description for class demos is taken from the top comment lines of each demo block (if available), otherwise the command line for calling the particular demo is used as a default.
+
+Any demos documenting the functionality of a property or method have to be saved in an external file in order to be included inside the respective collapsible item after the help documentation in the same manner it is done for functions. For this feature to work, you must be able to call the particular demos with the same typing convention as you do with the help docstrings.
+
 
 ## TODO
 
-1. Implement functionality for listing alphabetically all functions available
-from every package in Octave Packages that can be installed with `pkg`.
-2. Implement functionality for building similar documentation reference for
-Octave core functions.
+1. Write a C++ implementation for parsing texinfo to html to relax the
+dependency on the rather outdated `texi2html` software.
+3. Rewrite `build_DEMOS` function so that DEMO documentation includes
+the console output and generated figures just after the line of code
+that produces the output instead of accumulating all the output and
+figures after the DEMO code block. This should help larger DEMO blocks
+to be more intuitively presented in the generated documentation.
 
 
 ## Further notes

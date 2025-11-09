@@ -1,4 +1,4 @@
-## Copyright (C) 2023 Andreas Bertsatos <abertsatos@biol.uoa.gr>
+## Copyright (C) 2023-2025 Andreas Bertsatos <abertsatos@biol.uoa.gr>
 ##
 ## This file is part of the statistics package for GNU Octave.
 ##
@@ -29,7 +29,7 @@
 ## code block of each DEMO available in @var{fcnname}.
 ## @end itemize
 ##
-## @seealso{build_DEMOS, function_texi2html, find_GHurls}
+## @seealso{build_DEMOS, function_texi2html, classdef_texi2html, find_GHurls}
 ## @end deftypefn
 
 function demos = find_DEMOS (fcnname)

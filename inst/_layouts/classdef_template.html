@@ -2,7 +2,7 @@
       <div class="container-xl">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
           <div class="container-fluid">
-            <a class="navbar-brand" href=https://gnu-octave.github.io/packages/{{PKG_NAME}}>
+            <a class="navbar-brand" href=index.html>
               <img src="{{PKG_ICON}}" alt="{{PKG_NAME}}" class="d-inline-block align-top" width="25" height="25">
               {{PKG_TITLE}}
             </a>
@@ -11,6 +11,12 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
               <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link" href="index.html#{{CAT_NAME}}">
+                    <i class="fas fa-list-alt"></i>
+                    {{CAT_NAME}}
+                  </a>
+                </li>
                 <li class="nav-item">
                   <a class="nav-link" href="https://gnu-octave.github.io/packages/">
                   <img src="{{OCTAVE_LOGO}}" alt="GNU Octave logo" class="d-inline-block align-top" width="25" height="25">
@@ -30,24 +36,27 @@
       </div>
     </div>
     <div class="container-xl my-4">
-      <div class="card rounded">
-        <div class="card-header card-header-mod">
-          <div class="row d-flex flex-wrap align-items-center">
-            <div class="col-sm-3 col-md-2 mb-2 mb-sm-0">
-              <img src="{{PKG_ICON}}" class="img-fluid" alt="{{PKG_NAME}}" style="max-height: 180px;">
+      <div class="row flex-nowrap" style="min-height:0">
+        <div class="col-md-2 bg-light" style="overflow-y: scroll; width: 250px;">
+          <div class="p-2" style="text-align: center;">
+            <h3>Categories &</h3>
+            <h4 style="color: blue">Functions List</h4>
+          </div>
+{{FCN_LIST}}
+			  </div>
+			  <div class="col-md-10">
+          <div class="card rounded">
+            <div class="card-header card-header-mod">
+              <div class="row d-flex flex-wrap align-items-center">
+                <h3 class="d-inline-block mr-2">
+                Class&nbsp;Definition: <b><code>{{CLS_NAME}}</code></b>
+                </h3>
+              </div>
             </div>
-            <div class="col-sm-9 col-md-10">
-              <h3 class="d-inline-block mr-2">{{PKG_NAME}}</h3>
-              <b>{{PKG_VERSION}}&nbsp;{{PKG_DATE}}</b>
-              <p class="indent">
-                {{PKG_DESCRIPTION}}
-              </p>
+            <div class="card-body">
+{{CLS_TEXT}}
             </div>
           </div>
-        </div>
-        <div class="card-body">
-{{CATEGORY_SELECTOR}}
-{{PKG_FUNCTION_LIST}}
         </div>
       </div>
     </div>

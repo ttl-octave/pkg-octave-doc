@@ -1,4 +1,4 @@
-## Copyright (C) 2023 Andreas Bertsatos <abertsatos@biol.uoa.gr>
+## Copyright (C) 2023-2025 Andreas Bertsatos <abertsatos@biol.uoa.gr>
 ##
 ## This file is part of the statistics package for GNU Octave.
 ##
@@ -145,8 +145,58 @@ function [varargout] = package_texi2html (pkgname)
     pkgfcns = find_GHurls (info.PKG_URL, pkgfcns);
   endif
 
-  ## Create "assets" folder (if it exists, remove it and create new)
+  ## Default folder for images
   asset = "assets";
+
+  ## Default path for Octave logo
+  octave_logo = strcat (asset, "/octave-logo.svg");
+
+  ## Get package's logo from /doc folder from package's installation directory
+  ## If no .svg or .png image available, use pkg default icon from _layouts
+  sd = fullfile (pkg_info{1}.dir, "doc");
+  if (exist (fullfile (sd, [pkgname, ".png"])) == 2)
+    pkg_icon = [pkgname, ".png"];
+    icon_exists = true;
+  elseif (exist (fullfile (sd, [pkgname, ".svg"])) == 2)
+    pkg_icon = [pkgname, ".svg"];
+    icon_exists = true;
+  else
+    ## Check for alternative name after the root directory of the repository
+    root_dir_name = strsplit (pkg_info{1}.url, '/'){end};
+    if (exist (fullfile (sd, [root_dir_name, ".png"])) == 2)
+      pkg_icon = [root_dir_name, ".png"];
+      icon_exists = true;
+    elseif (exist (fullfile (sd, [root_dir_name, ".svg"])) == 2)
+      pkg_icon = [root_dir_name, ".svg"];
+      icon_exists = true;
+    else
+      sd = fullfile (file_in_loadpath ("pkg.png"));
+      pkg_icon = [pkgname, ".png"];
+      icon_exists = false;
+    endif
+  endif
+
+  ## Copy specific info for other functions
+  info.PKG_ICON = strcat (asset, "/", pkg_icon);
+  info.PKG_NAME = pkgname;
+  info.PKG_TITLE = pkg_title;
+  info.OCTAVE_LOGO = octave_logo;
+
+  ## If output arguments are requested, return them here and skip
+  ## creating the "assets" folder or any HTML files.
+  if (nargout > 0)
+    varargout{1} = pkgfcns;
+    if (nargout > 1)
+      varargout{2} = info;
+    endif
+    ## Unload package if it was loaded from this function
+    if (pkg_loaded)
+      pkg ("unload", pkgname);
+    endif
+    return;
+  endif
+
+  ## Create "assets" folder (if it exists, remove it and create new)
   if (exist (asset) == 7)
     confirm_recursive_rmdir (0, "local");
     [status, msg, msgid] = rmdir (asset, "s");
@@ -159,35 +209,15 @@ function [varargout] = package_texi2html (pkgname)
     error ("package_texi2html: cannot create %s directory.", asset);
   endif
 
-  ## Copy octave logo
-  sd = fullfile (file_in_loadpath ("octave-logo.svg"));
-  [status, msg, msgid] = copyfile (sd, asset, "f");
-  if (status != 1)
-    error ("package_texi2html: cannot copy octave logo to %s directory.", asset);
-  endif
-  octave_logo = strcat (asset, "/octave-logo.svg");
-
-  ## Get package's logo from /doc folder from package's installation directory
-  ## If no .svg or .png image available, use pkg default icon from _layouts
-  sd = fullfile (pkg_info{1}.dir, "doc");
-  if (exist (fullfile (sd, [pkgname, ".png"])) == 2)
-    pkg_icon = [pkgname, ".png"];
+  ## Copy package's logo from /doc folder from package's installation directory
+  ## of the pkg default icon from _layouts and rename it appropriately
+  if (icon_exists)
     sd = fullfile (sd, pkg_icon);
     [status, msg, msgid] = copyfile (sd, asset, "f");
     if (status != 1)
       error ("package_texi2html: cannot copy %s logo to %s directory.", ...
              pkgname, asset);
     endif
-    pkg_icon = strcat (asset, "/", pkg_icon);
-  elseif (exist (fullfile (sd, [pkgname, ".svg"])) == 2)
-    pkg_icon = [pkgname, ".png"];
-    sd = fullfile (sd, pkg_icon);
-    [status, msg, msgid] = copyfile (sd, asset, "f");
-    if (status != 1)
-      error ("package_texi2html: cannot copy %s logo to %s directory.", ...
-             pkgname, asset);
-    endif
-    pkg_icon = strcat (asset, "/", pkg_icon);
   else
     sd = fullfile (file_in_loadpath ("pkg.png"));
     [status, msg, msgid] = copyfile (sd, asset, "f");
@@ -195,36 +225,24 @@ function [varargout] = package_texi2html (pkgname)
       error (strcat (["package_texi2html: cannot copy default package"], ...
                      sprintf (" logo to %s directory.", asset)));
     endif
-    pkg_icon = [pkgname, ".png"];
     old_name = fullfile ("assets", "pkg.png");
     new_name = fullfile ("assets", pkg_icon);
     [err, msg] = rename (old_name, new_name);
     if (err)
       error ("package_texi2html: cannot rename pkg.png file.");
     endif
-    pkg_icon = strcat (asset, "/", pkg_icon);
   endif
 
-  ## Copy specific info for other functions
-  info.PKG_ICON = pkg_icon;
-  info.PKG_NAME = pkgname;
-  info.PKG_TITLE = pkg_title;
-  info.OCTAVE_LOGO = octave_logo;
-
-  ## If nargout > 0, then return output arguments and do not generate HTML files
-  if (nargout > 0)
-    varargout{1} = pkgfcns;
-    varargout{2} = info;
-    ## Unload package if it was loaded from this function
-    if (pkg_loaded)
-      pkg ("unload", pkgname);
-    endif
-    return;
+  ## Copy octave logo
+  sd = fullfile (file_in_loadpath ("octave-logo.svg"));
+  [status, msg, msgid] = copyfile (sd, asset, "f");
+  if (status != 1)
+    error ("package_texi2html: cannot copy octave logo to %s directory.", asset);
   endif
 
   ## Populate index template with package info
   index_template = fileread (fullfile ("_layouts", "index_template.html"));
-  index_template = strrep (index_template, "{{PKG_ICON}}", pkg_icon);
+  index_template = strrep (index_template, "{{PKG_ICON}}", info.PKG_ICON);
   index_template = strrep (index_template, "{{PKG_NAME}}", pkgname);
   index_template = strrep (index_template, "{{PKG_TITLE}}", pkg_title);
   index_template = strrep (index_template, "{{OCTAVE_LOGO}}", octave_logo);
@@ -274,8 +292,13 @@ function [varargout] = package_texi2html (pkgname)
       fcnfirst = get_first_help_sentence (fcnname, 240);
       tmp_fcn = sprintf ("                 <td>%s</td>\n", fcnfirst);
       fcn_list = [fcn_list tmp_fcn tmp_7];
-      ## Build individual function html
-      function_texi2html (fcnname, pkgfcns, info);
+      ## Build individual function of classdef html
+      try
+        MTDS = methods (fcnname);
+        classdef_texi2html (fcnname, pkgfcns, info);
+      catch
+        function_texi2html (fcnname, pkgfcns, info);
+      end_try_catch
     endfor
     fcn_list = [fcn_list tmp_8 tmp_9];
   endfor
@@ -294,7 +317,7 @@ function [varargout] = package_texi2html (pkgname)
 
   ## Write to html file
   fid = fopen ("index.html", "w");
-  fprintf (fid, output_str);
+  fprintf (fid, "%s", output_str);
   fclose (fid);
 
 endfunction

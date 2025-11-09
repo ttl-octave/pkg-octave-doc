@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Octave Package Documentation: find_GHurls</title>
+    <title>Octave Package Documentation: classdef_texi2html</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -121,9 +121,9 @@
 				<div class="list">
 				<ul style="list-style-type: none; padding-left: 20px;">
 					<li><a href="build_DEMOS.html" class="text-decoration-none font-monospace"><small>build_DEMOS</small></a></li>
-					<li><a href="classdef_texi2html.html" class="text-decoration-none font-monospace"><small>classdef_texi2html</small></a></li>
+					<li><a href="classdef_texi2html.html" class="text-decoration-none font-monospace fw-bolder"><small>classdef_texi2html</small></a></li>
 					<li><a href="find_DEMOS.html" class="text-decoration-none font-monospace"><small>find_DEMOS</small></a></li>
-					<li><a href="find_GHurls.html" class="text-decoration-none font-monospace fw-bolder"><small>find_GHurls</small></a></li>
+					<li><a href="find_GHurls.html" class="text-decoration-none font-monospace"><small>find_GHurls</small></a></li>
 					<li><a href="function_texi2html.html" class="text-decoration-none font-monospace"><small>function_texi2html</small></a></li>
 					<li><a href="list_packages.html" class="text-decoration-none font-monospace"><small>list_packages</small></a></li>
 					<li><a href="package_texi2html.html" class="text-decoration-none font-monospace"><small>package_texi2html</small></a></li>
@@ -137,49 +137,63 @@
             <div class="card-header card-header-mod">
               <div class="row d-flex flex-wrap align-items-center">
                 <h3 class="d-inline-block mr-2">
-                Function&nbsp;Reference: <b><code>find_GHurls</code></b>
+                Function&nbsp;Reference: <b><code>classdef_texi2html</code></b>
                 </h3>
               </div>
             </div>
             <div class="card-body">
 <dl>
-<dt><code><h5 class="fs">pkg-octave-doc: <var>pkgfcns</var> = <b>find_GHurls</b> (<var>pkgurl</var>, <var>pkgfcns</var>)</code></h5></dt>
+<dt><code><h5 class="fs">pkg-octave-doc: <b>classdef_texi2html</b> (<var>clsname</var>, <var>pkgfcns</var>, <var>info</var>)</code></h5></dt>
 </dl>
 
-<p> Retrieve unique URLs to every function&rsquo;s location within the package&rsquo;s GitHub
- repository.
+<p> Generate HTML page for a class definition.
 </p>
 <div class="ms-5">
-<p> <code>find_GHurls</code> requires two input arguments, <var>pkgurl</var>, a char string
- with the URL to the root directory to the package&rsquo;s GitHub repository and
- <var>pkgfcns</var>, a Nx2 cell array containing the package&rsquo;s available functions
- (1st column) and their respective category (2nd column).
+<p> <code>function_texi2html</code> requires three input arguments: <var>clsname</var>, a
+ char string with the class&rsquo; name; <var>pkgfcns</var>, a cell array with all
+ available functions of a package; and <var>info</var>, a structure with relevant
+ information about the package, which the function <var>clsname</var> belongs to.
 </p>
-<p> Note: <code>find_GHurls</code> explicitly works with repositories hosted on GitHub!
- <var>pkgurl</var> can be easily retrieved from the <code>PKG_URL</code> field of the
- <var>info</var> structure returned from <code>package_texi2html</code>.
+<p> <var>pkgfcns</var> can be either a <math>N&times;2</math> or a <math>N&times;3</math> cell array, whose
+ 1st column list all available function names, the 2nd column list the each
+ function&rsquo;s category, and the 3rd column contains the URL to the function&rsquo;s
+ source code.  <var>pkgfcns</var> is used to create relative references to other
+ pages of functions which are listed in the <code>seealso</code> tag.  When a third
+ column is present, <code>function_texi2html</code> uses it to add a source code
+ link of the the function in <var>clsname</var>.
 </p>
-<p> <code>find_GHurls</code> returns a cell array, <var>pkgfcns</var>, by appending a third
- column to the input <var>pkgfcns</var> with the URLs to the source code location
- of each individual function listed in the 1st column of <var>pkgfcns</var>.
- <code>find_GHurls</code> relies on <code>curl</code> and <code>tar</code>, which must be
- installed and available to the system&rsquo;s <code>$PATH</code>, and an active internet
- connection to download and extract the targeted repository to a temporary
- directory.  If either <code>curl</code> or <code>tar</code> fail for any reason,
- <code>find_GHurls</code> returns a verbatim copy of the input <var>pkgfcns</var>.
+<p> The <var>info</var> structure requires at least the following fields:
 </p>
-<p> Use the following example to obtain a cell array with each function&rsquo;s URL to
- its source code location at GitHub:
-</p>
- <table><tr><td>&nbsp;</td><td><pre class="example"> [pkgfcns, info] = package_texi2html (&quot;pkg-octave-doc&quot;);
- pkgfcns = find_GHurls (info.PKG_URL, pkgfcns);
- </pre></td></tr></table>
+ <table>
+<thead><tr><th width="20%">Field Name</th><th width="80%">Description</th></tr></thead>
+<tr><td width="20%"><code>PKG_ICON</code></td><td width="80%">The relative reference to the package&rsquo;s logo
+ image which must be either in .svg or .png format and it is located in the
+ newly created <code>assets/</code> folder inside the working directory.</td></tr>
+<tr><td width="20%"><code>PKG_NAME</code></td><td width="80%">The package&rsquo;s name (e.g. &quot;pkg-octave-doc&quot;)</td></tr>
+<tr><td width="20%"><code>PKG_TITLE</code></td><td width="80%">The package&rsquo;s title (e.g. &quot;Octave Package
+ Documentation&quot;)</td></tr>
+<tr><td width="20%"><code>OCTAVE_LOGO</code></td><td width="80%">The relative reference to Octave&rsquo;s logo, also
+ located inside the <code>assets/</code> folder.</td></tr>
+</table>
 
+<p> To generate a suitable <math>N&times;2</math> cell array for a specific package, use the
+ <code>package_texi2html</code> function and to populate is with the 3rd column use
+ <code>find_GHurls</code>.  The <var>info</var> structure can also be created with
+ <code>package_texi2html</code>.
+</p>
+<p> <code>function_texi2html</code> depends on the <code>texi2html</code> command line tool
+ version 1.82, which must be installed and available on the system&rsquo;s $PATH,
+ and the generated HTML code is based on the <code>function_template.html</code>
+ and <code>default.html</code> layouts.
+</p>
 <p> <strong>See also: </strong>
-  <a href="function_texi2html.html">function_texi2html</a>
+  <a href="package_texi2html.html">package_texi2html</a>, 
+  <a href="function_texi2html.html">function_texi2html</a>, 
+  <a href="find_GHurls.html">find_GHurls</a>, 
+  <a href="build_DEMOS.html">build_DEMOS</a>
 </p>
 <p><strong>Source Code: </strong>
-  <a href="https://github.com/gnu-octave/pkg-octave-doc/tree/main/inst/find_GHurls.m">find_GHurls</a>
+  <a href="https://github.com/gnu-octave/pkg-octave-doc/tree/main/inst/classdef_texi2html.m">classdef_texi2html</a>
 </div>
 
             </div>

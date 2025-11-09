@@ -1,4 +1,4 @@
-## Copyright (C) 2023 Andreas Bertsatos <abertsatos@biol.uoa.gr>
+## Copyright (C) 2023-2025 Andreas Bertsatos <abertsatos@biol.uoa.gr>
 ##
 ## This file is part of the statistics package for GNU Octave.
 ##
@@ -29,7 +29,7 @@
 ## @qcode{demos_template.html} layout for every DEMO available in @var{fcnname}.
 ## @end itemize
 ##
-## @seealso{find_DEMOS, function_texi2html, find_GHurls}
+## @seealso{find_DEMOS, function_texi2html, classdef_texi2html, find_GHurls}
 ## @end deftypefn
 
 function html = build_DEMOS (fcnname)
@@ -86,18 +86,22 @@ function html = build_DEMOS (fcnname)
           oldpso = page_screen_output(1);
 
           ## Format HTML string with demo code
-          code = demos{demo_num};
-          demo_html = [demo_html tmp_0 tmp_1 tmp_2 code "\n"];
+          demo_code = demos{demo_num};
+          demo_html = [demo_html tmp_0 tmp_1 tmp_2 demo_code "\n"];
 
           ## Evaluate DEMO code
           diary (diary_file);
-          eval (code);
+          eval (demo_code);
           diary ("off");
 
           ## Read __diary__.txt
           fid = fopen (diary_file);
           demo_text = fscanf (fid, "%c", Inf);
           fclose (fid);
+
+          ## Replace '<' and '>' with '&lt;' and '&gt;' respectively
+          demo_text = strrep (demo_text, "<", "&lt;");
+          demo_text = strrep (demo_text, ">", "&gt;");
 
           ## Format HTML string with demo output
           demo_html = [demo_html demo_text tmp_3 tmp_4];
