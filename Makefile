@@ -33,12 +33,6 @@ help:
 	@echo "Create $@ ..."
 	@tar -c -f - --posix -C "$(TARGET_DIR)/" "$(notdir $<)" | gzip -9n > "$@"
 
-# Create the directory structure of the destributed archive file.
-# For this, archive the current git repo with some exceptions given
-# in .gitattributes with export-ignore and untar it. Then, copy the
-# slicot routines together with README and LICENSE file into a
-# subdirectory. Finally move  TG04BX.f, a version of TB04BX.f extended
-# for descriptor systems into that directory.
 $(RELEASE_DIR): .git/index
 	@echo "Creating package dist directory $@ ..."
 	@-$(RM) -r $@
