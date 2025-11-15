@@ -145,8 +145,10 @@ function html_txt = __texi2html__ (text, fcnname, pkgfcns)
   ## Evaluate each case whether it conforms to size dimensions and replace
   ## 'x' or '*' with '&times;'.
   ## alphanumeric chars
-  html_txt = strrep (html_txt, "<em>", "<math>");
-  html_txt = strrep (html_txt, "</em>", "</math>");
+  
+  #### Skip replacin <em> by <math> allowing text in italics
+  #### html_txt = strrep (html_txt, "<em>", "<math>");
+  #### html_txt = strrep (html_txt, "</em>", "</math>");
   math_beg = strfind (html_txt, "<math>") + 6;
   math_end = strfind (html_txt, "</math>") - 1;
   if (! isempty (math_beg) && ! isempty (math_end))
